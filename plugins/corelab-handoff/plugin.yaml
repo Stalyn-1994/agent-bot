@@ -1,0 +1,6 @@
+name: corelab-handoff
+version: 2.0.1
+description: Atencion humana de Corelab en chats privados con temas por caso
+author: Corelab
+provides_tools:
+  - derivar_a_humano

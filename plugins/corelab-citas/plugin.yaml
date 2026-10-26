@@ -1,0 +1,10 @@
+name: corelab-citas
+version: 1.3.0
+description: Citas presenciales de Corelab desde Telegram con Google Calendar y avisos a un asesor
+author: Corelab
+provides_tools:
+  - privacidad_citas
+  - consultar_cupos
+  - solicitar_cita
+  - mis_citas
+  - cancelar_cita

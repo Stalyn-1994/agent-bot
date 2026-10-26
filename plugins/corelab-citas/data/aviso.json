@@ -1,0 +1,11 @@
+{
+  "version": "piloto-2026-10-23.1",
+  "pdf": "aviso-privacidad-piloto.pdf",
+  "text": "aviso-privacidad-piloto.txt",
+  "pdf_sha256": "ef3af76387b19cb75782207af8306177acab1c0b21027621f33756af025e61ee",
+  "text_sha256": "b1899c2444f8c02cb7f40cd602c8810ed110c28bd1ae45c8e03cd222829b2e10",
+  "status": "demonstration_draft",
+  "test_data_only": true,
+  "retention_period": null,
+  "automatic_deletion": false
+}

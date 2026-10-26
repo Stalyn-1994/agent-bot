@@ -1,0 +1,1873 @@
+{
+  "version": 1,
+  "bot_id": 8634172328,
+  "scopes": {
+    "[{\"type\":\"default\"},\"\"]": {
+      "scope": {
+        "type": "default"
+      },
+      "language": "",
+      "before": [
+        {
+          "command": "help",
+          "description": "Show available commands (/help skills lists skill commands, /help <text> filters)"
+        },
+        {
+          "command": "new",
+          "description": "Start a new session (fresh session ID + history)"
+        },
+        {
+          "command": "stop",
+          "description": "Kill all running background processes"
+        },
+        {
+          "command": "status",
+          "description": "Show session, model, token, and context info"
+        },
+        {
+          "command": "egress",
+          "description": "Show Docker egress proxy status"
+        },
+        {
+          "command": "resume",
+          "description": "Resume a previously-named session"
+        },
+        {
+          "command": "sessions",
+          "description": "Browse and resume previous sessions"
+        },
+        {
+          "command": "model",
+          "description": "Switch model (session-scoped; --global to persist)"
+        },
+        {
+          "command": "debug",
+          "description": "Upload debug report (system info + logs) and get shareable links"
+        },
+        {
+          "command": "restart",
+          "description": "Gracefully restart the gateway after draining active runs"
+        },
+        {
+          "command": "update",
+          "description": "Update Hermes Agent to the latest version"
+        },
+        {
+          "command": "commands",
+          "description": "Browse all commands and skills (paginated)"
+        },
+        {
+          "command": "approve",
+          "description": "Approve a pending dangerous command"
+        },
+        {
+          "command": "deny",
+          "description": "Deny a pending dangerous command (optionally with a reason)"
+        },
+        {
+          "command": "queue",
+          "description": "Queue a prompt for the next turn, or list/edit/rm/move/clear queued prompts"
+        },
+        {
+          "command": "steer",
+          "description": "Inject a message after the next tool call without interrupting"
+        },
+        {
+          "command": "bg",
+          "description": "Run a prompt in a separate background session"
+        },
+        {
+          "command": "btw",
+          "description": "Ask a side question about the current conversation without interrupting it"
+        },
+        {
+          "command": "reasoning",
+          "description": "Manage reasoning effort and display"
+        },
+        {
+          "command": "usage",
+          "description": "Show token usage and rate limits; `reset` redeems a banked Codex limit reset"
+        },
+        {
+          "command": "platform",
+          "description": "Pause, resume, or list a failing gateway platform"
+        },
+        {
+          "command": "profile",
+          "description": "Show active profile name and home directory"
+        },
+        {
+          "command": "whoami",
+          "description": "Show your slash command access (admin / user)"
+        },
+        {
+          "command": "start",
+          "description": "Acknowledge platform start pings without a reply"
+        },
+        {
+          "command": "topic",
+          "description": "Enable or inspect Telegram DM topic sessions"
+        },
+        {
+          "command": "save",
+          "description": "Export the current conversation (bare /save shows usage)"
+        },
+        {
+          "command": "retry",
+          "description": "Retry the last message (resend to agent)"
+        },
+        {
+          "command": "undo",
+          "description": "Back up N user turns and re-prompt (default 1)"
+        },
+        {
+          "command": "title",
+          "description": "Set a title for the current session"
+        },
+        {
+          "command": "branch",
+          "description": "Branch the current session (new thread on Discord/Telegram/Slack/Matrix; --here stays here)"
+        },
+        {
+          "command": "compress",
+          "description": "Compress conversation context (add 'here [N]' to keep recent N turns; --preview shows what would happen)"
+        },
+        {
+          "command": "rollback",
+          "description": "List or restore filesystem checkpoints (restores keep your hand-edits; --all overrides)"
+        },
+        {
+          "command": "pause",
+          "description": "Pause new work globally (emergency stop); '/pause off' resumes"
+        },
+        {
+          "command": "agents",
+          "description": "Show active agents and running tasks"
+        },
+        {
+          "command": "goal",
+          "description": "Set a standing goal Hermes works on across turns until achieved"
+        },
+        {
+          "command": "heartbeat",
+          "description": "Set a recurring prompt that re-enters this session when idle"
+        },
+        {
+          "command": "refine",
+          "description": "Review this conversation now and save lessons to memory/skills"
+        },
+        {
+          "command": "review",
+          "description": "Spawn an independent subagent to review the work just discussed (PR, code, docs)"
+        },
+        {
+          "command": "loop",
+          "description": "Re-run a prompt on a recurring interval in this session"
+        },
+        {
+          "command": "plan",
+          "description": "Write a markdown implementation plan to .hermes/plans/ without executing anything"
+        },
+        {
+          "command": "moa",
+          "description": "Run one prompt through the default Mixture of Agents preset, then restore your model"
+        },
+        {
+          "command": "subgoal",
+          "description": "Add or manage extra criteria on the active goal"
+        },
+        {
+          "command": "context",
+          "description": "Show detailed context window view with usage gauge, category breakdown, compression stats, and throughput"
+        },
+        {
+          "command": "sethome",
+          "description": "Set this chat as the home channel"
+        },
+        {
+          "command": "codex_runtime",
+          "description": "Toggle codex app-server runtime for OpenAI/Codex models"
+        },
+        {
+          "command": "personality",
+          "description": "Set a predefined personality"
+        },
+        {
+          "command": "diff",
+          "description": "Show git changes in the working directory"
+        },
+        {
+          "command": "footer",
+          "description": "Toggle gateway runtime-metadata footer on final replies"
+        },
+        {
+          "command": "yolo",
+          "description": "Toggle YOLO mode (skip all dangerous command approvals)"
+        },
+        {
+          "command": "approvals",
+          "description": "Show or set the persistent dangerous-command approval mode"
+        },
+        {
+          "command": "fast",
+          "description": "Fast mode - OpenAI Priority Processing / Anthropic Fast Mode (normal/fast/auto/cold)"
+        },
+        {
+          "command": "voice",
+          "description": "Toggle voice mode"
+        },
+        {
+          "command": "busy",
+          "description": "Control how messages behave while Hermes is working"
+        },
+        {
+          "command": "memory",
+          "description": "Review pending memory writes / toggle the approval gate"
+        },
+        {
+          "command": "bundles",
+          "description": "List skill bundles (aliases /<name> for multiple skills)"
+        },
+        {
+          "command": "learn",
+          "description": "Learn a reusable skill from anything you describe (dirs, URLs, this chat, notes)"
+        },
+        {
+          "command": "init",
+          "description": "Generate or update AGENTS.md project instructions from a repo scan"
+        },
+        {
+          "command": "suggestions",
+          "description": "Review suggested automations (accept/dismiss)"
+        },
+        {
+          "command": "blueprint",
+          "description": "Set up an automation from a blueprint template"
+        },
+        {
+          "command": "curator",
+          "description": "Background skill maintenance (status, run, pin, archive, list-archived)"
+        }
+      ],
+      "expected": []
+    },
+    "[{\"type\":\"all_private_chats\"},\"\"]": {
+      "scope": {
+        "type": "all_private_chats"
+      },
+      "language": "",
+      "before": [
+        {
+          "command": "help",
+          "description": "Show available commands (/help skills lists skill commands, /help <text> filters)"
+        },
+        {
+          "command": "new",
+          "description": "Start a new session (fresh session ID + history)"
+        },
+        {
+          "command": "stop",
+          "description": "Kill all running background processes"
+        },
+        {
+          "command": "status",
+          "description": "Show session, model, token, and context info"
+        },
+        {
+          "command": "egress",
+          "description": "Show Docker egress proxy status"
+        },
+        {
+          "command": "resume",
+          "description": "Resume a previously-named session"
+        },
+        {
+          "command": "sessions",
+          "description": "Browse and resume previous sessions"
+        },
+        {
+          "command": "model",
+          "description": "Switch model (session-scoped; --global to persist)"
+        },
+        {
+          "command": "debug",
+          "description": "Upload debug report (system info + logs) and get shareable links"
+        },
+        {
+          "command": "restart",
+          "description": "Gracefully restart the gateway after draining active runs"
+        },
+        {
+          "command": "update",
+          "description": "Update Hermes Agent to the latest version"
+        },
+        {
+          "command": "commands",
+          "description": "Browse all commands and skills (paginated)"
+        },
+        {
+          "command": "approve",
+          "description": "Approve a pending dangerous command"
+        },
+        {
+          "command": "deny",
+          "description": "Deny a pending dangerous command (optionally with a reason)"
+        },
+        {
+          "command": "queue",
+          "description": "Queue a prompt for the next turn, or list/edit/rm/move/clear queued prompts"
+        },
+        {
+          "command": "steer",
+          "description": "Inject a message after the next tool call without interrupting"
+        },
+        {
+          "command": "bg",
+          "description": "Run a prompt in a separate background session"
+        },
+        {
+          "command": "btw",
+          "description": "Ask a side question about the current conversation without interrupting it"
+        },
+        {
+          "command": "reasoning",
+          "description": "Manage reasoning effort and display"
+        },
+        {
+          "command": "usage",
+          "description": "Show token usage and rate limits; `reset` redeems a banked Codex limit reset"
+        },
+        {
+          "command": "platform",
+          "description": "Pause, resume, or list a failing gateway platform"
+        },
+        {
+          "command": "profile",
+          "description": "Show active profile name and home directory"
+        },
+        {
+          "command": "whoami",
+          "description": "Show your slash command access (admin / user)"
+        },
+        {
+          "command": "start",
+          "description": "Acknowledge platform start pings without a reply"
+        },
+        {
+          "command": "topic",
+          "description": "Enable or inspect Telegram DM topic sessions"
+        },
+        {
+          "command": "save",
+          "description": "Export the current conversation (bare /save shows usage)"
+        },
+        {
+          "command": "retry",
+          "description": "Retry the last message (resend to agent)"
+        },
+        {
+          "command": "undo",
+          "description": "Back up N user turns and re-prompt (default 1)"
+        },
+        {
+          "command": "title",
+          "description": "Set a title for the current session"
+        },
+        {
+          "command": "branch",
+          "description": "Branch the current session (new thread on Discord/Telegram/Slack/Matrix; --here stays here)"
+        },
+        {
+          "command": "compress",
+          "description": "Compress conversation context (add 'here [N]' to keep recent N turns; --preview shows what would happen)"
+        },
+        {
+          "command": "rollback",
+          "description": "List or restore filesystem checkpoints (restores keep your hand-edits; --all overrides)"
+        },
+        {
+          "command": "pause",
+          "description": "Pause new work globally (emergency stop); '/pause off' resumes"
+        },
+        {
+          "command": "agents",
+          "description": "Show active agents and running tasks"
+        },
+        {
+          "command": "goal",
+          "description": "Set a standing goal Hermes works on across turns until achieved"
+        },
+        {
+          "command": "heartbeat",
+          "description": "Set a recurring prompt that re-enters this session when idle"
+        },
+        {
+          "command": "refine",
+          "description": "Review this conversation now and save lessons to memory/skills"
+        },
+        {
+          "command": "review",
+          "description": "Spawn an independent subagent to review the work just discussed (PR, code, docs)"
+        },
+        {
+          "command": "loop",
+          "description": "Re-run a prompt on a recurring interval in this session"
+        },
+        {
+          "command": "plan",
+          "description": "Write a markdown implementation plan to .hermes/plans/ without executing anything"
+        },
+        {
+          "command": "moa",
+          "description": "Run one prompt through the default Mixture of Agents preset, then restore your model"
+        },
+        {
+          "command": "subgoal",
+          "description": "Add or manage extra criteria on the active goal"
+        },
+        {
+          "command": "context",
+          "description": "Show detailed context window view with usage gauge, category breakdown, compression stats, and throughput"
+        },
+        {
+          "command": "sethome",
+          "description": "Set this chat as the home channel"
+        },
+        {
+          "command": "codex_runtime",
+          "description": "Toggle codex app-server runtime for OpenAI/Codex models"
+        },
+        {
+          "command": "personality",
+          "description": "Set a predefined personality"
+        },
+        {
+          "command": "diff",
+          "description": "Show git changes in the working directory"
+        },
+        {
+          "command": "footer",
+          "description": "Toggle gateway runtime-metadata footer on final replies"
+        },
+        {
+          "command": "yolo",
+          "description": "Toggle YOLO mode (skip all dangerous command approvals)"
+        },
+        {
+          "command": "approvals",
+          "description": "Show or set the persistent dangerous-command approval mode"
+        },
+        {
+          "command": "fast",
+          "description": "Fast mode - OpenAI Priority Processing / Anthropic Fast Mode (normal/fast/auto/cold)"
+        },
+        {
+          "command": "voice",
+          "description": "Toggle voice mode"
+        },
+        {
+          "command": "busy",
+          "description": "Control how messages behave while Hermes is working"
+        },
+        {
+          "command": "memory",
+          "description": "Review pending memory writes / toggle the approval gate"
+        },
+        {
+          "command": "bundles",
+          "description": "List skill bundles (aliases /<name> for multiple skills)"
+        },
+        {
+          "command": "learn",
+          "description": "Learn a reusable skill from anything you describe (dirs, URLs, this chat, notes)"
+        },
+        {
+          "command": "init",
+          "description": "Generate or update AGENTS.md project instructions from a repo scan"
+        },
+        {
+          "command": "suggestions",
+          "description": "Review suggested automations (accept/dismiss)"
+        },
+        {
+          "command": "blueprint",
+          "description": "Set up an automation from a blueprint template"
+        },
+        {
+          "command": "curator",
+          "description": "Background skill maintenance (status, run, pin, archive, list-archived)"
+        }
+      ],
+      "expected": []
+    },
+    "[{\"type\":\"all_group_chats\"},\"\"]": {
+      "scope": {
+        "type": "all_group_chats"
+      },
+      "language": "",
+      "before": [
+        {
+          "command": "help",
+          "description": "Show available commands (/help skills lists skill commands, /help <text> filters)"
+        },
+        {
+          "command": "new",
+          "description": "Start a new session (fresh session ID + history)"
+        },
+        {
+          "command": "stop",
+          "description": "Kill all running background processes"
+        },
+        {
+          "command": "status",
+          "description": "Show session, model, token, and context info"
+        },
+        {
+          "command": "egress",
+          "description": "Show Docker egress proxy status"
+        },
+        {
+          "command": "resume",
+          "description": "Resume a previously-named session"
+        },
+        {
+          "command": "sessions",
+          "description": "Browse and resume previous sessions"
+        },
+        {
+          "command": "model",
+          "description": "Switch model (session-scoped; --global to persist)"
+        },
+        {
+          "command": "debug",
+          "description": "Upload debug report (system info + logs) and get shareable links"
+        },
+        {
+          "command": "restart",
+          "description": "Gracefully restart the gateway after draining active runs"
+        },
+        {
+          "command": "update",
+          "description": "Update Hermes Agent to the latest version"
+        },
+        {
+          "command": "commands",
+          "description": "Browse all commands and skills (paginated)"
+        },
+        {
+          "command": "approve",
+          "description": "Approve a pending dangerous command"
+        },
+        {
+          "command": "deny",
+          "description": "Deny a pending dangerous command (optionally with a reason)"
+        },
+        {
+          "command": "queue",
+          "description": "Queue a prompt for the next turn, or list/edit/rm/move/clear queued prompts"
+        },
+        {
+          "command": "steer",
+          "description": "Inject a message after the next tool call without interrupting"
+        },
+        {
+          "command": "bg",
+          "description": "Run a prompt in a separate background session"
+        },
+        {
+          "command": "btw",
+          "description": "Ask a side question about the current conversation without interrupting it"
+        },
+        {
+          "command": "reasoning",
+          "description": "Manage reasoning effort and display"
+        },
+        {
+          "command": "usage",
+          "description": "Show token usage and rate limits; `reset` redeems a banked Codex limit reset"
+        },
+        {
+          "command": "platform",
+          "description": "Pause, resume, or list a failing gateway platform"
+        },
+        {
+          "command": "profile",
+          "description": "Show active profile name and home directory"
+        },
+        {
+          "command": "whoami",
+          "description": "Show your slash command access (admin / user)"
+        },
+        {
+          "command": "start",
+          "description": "Acknowledge platform start pings without a reply"
+        },
+        {
+          "command": "topic",
+          "description": "Enable or inspect Telegram DM topic sessions"
+        },
+        {
+          "command": "save",
+          "description": "Export the current conversation (bare /save shows usage)"
+        },
+        {
+          "command": "retry",
+          "description": "Retry the last message (resend to agent)"
+        },
+        {
+          "command": "undo",
+          "description": "Back up N user turns and re-prompt (default 1)"
+        },
+        {
+          "command": "title",
+          "description": "Set a title for the current session"
+        },
+        {
+          "command": "branch",
+          "description": "Branch the current session (new thread on Discord/Telegram/Slack/Matrix; --here stays here)"
+        },
+        {
+          "command": "compress",
+          "description": "Compress conversation context (add 'here [N]' to keep recent N turns; --preview shows what would happen)"
+        },
+        {
+          "command": "rollback",
+          "description": "List or restore filesystem checkpoints (restores keep your hand-edits; --all overrides)"
+        },
+        {
+          "command": "pause",
+          "description": "Pause new work globally (emergency stop); '/pause off' resumes"
+        },
+        {
+          "command": "agents",
+          "description": "Show active agents and running tasks"
+        },
+        {
+          "command": "goal",
+          "description": "Set a standing goal Hermes works on across turns until achieved"
+        },
+        {
+          "command": "heartbeat",
+          "description": "Set a recurring prompt that re-enters this session when idle"
+        },
+        {
+          "command": "refine",
+          "description": "Review this conversation now and save lessons to memory/skills"
+        },
+        {
+          "command": "review",
+          "description": "Spawn an independent subagent to review the work just discussed (PR, code, docs)"
+        },
+        {
+          "command": "loop",
+          "description": "Re-run a prompt on a recurring interval in this session"
+        },
+        {
+          "command": "plan",
+          "description": "Write a markdown implementation plan to .hermes/plans/ without executing anything"
+        },
+        {
+          "command": "moa",
+          "description": "Run one prompt through the default Mixture of Agents preset, then restore your model"
+        },
+        {
+          "command": "subgoal",
+          "description": "Add or manage extra criteria on the active goal"
+        },
+        {
+          "command": "context",
+          "description": "Show detailed context window view with usage gauge, category breakdown, compression stats, and throughput"
+        },
+        {
+          "command": "sethome",
+          "description": "Set this chat as the home channel"
+        },
+        {
+          "command": "codex_runtime",
+          "description": "Toggle codex app-server runtime for OpenAI/Codex models"
+        },
+        {
+          "command": "personality",
+          "description": "Set a predefined personality"
+        },
+        {
+          "command": "diff",
+          "description": "Show git changes in the working directory"
+        },
+        {
+          "command": "footer",
+          "description": "Toggle gateway runtime-metadata footer on final replies"
+        },
+        {
+          "command": "yolo",
+          "description": "Toggle YOLO mode (skip all dangerous command approvals)"
+        },
+        {
+          "command": "approvals",
+          "description": "Show or set the persistent dangerous-command approval mode"
+        },
+        {
+          "command": "fast",
+          "description": "Fast mode - OpenAI Priority Processing / Anthropic Fast Mode (normal/fast/auto/cold)"
+        },
+        {
+          "command": "voice",
+          "description": "Toggle voice mode"
+        },
+        {
+          "command": "busy",
+          "description": "Control how messages behave while Hermes is working"
+        },
+        {
+          "command": "memory",
+          "description": "Review pending memory writes / toggle the approval gate"
+        },
+        {
+          "command": "bundles",
+          "description": "List skill bundles (aliases /<name> for multiple skills)"
+        },
+        {
+          "command": "learn",
+          "description": "Learn a reusable skill from anything you describe (dirs, URLs, this chat, notes)"
+        },
+        {
+          "command": "init",
+          "description": "Generate or update AGENTS.md project instructions from a repo scan"
+        },
+        {
+          "command": "suggestions",
+          "description": "Review suggested automations (accept/dismiss)"
+        },
+        {
+          "command": "blueprint",
+          "description": "Set up an automation from a blueprint template"
+        },
+        {
+          "command": "curator",
+          "description": "Background skill maintenance (status, run, pin, archive, list-archived)"
+        }
+      ],
+      "expected": []
+    },
+    "[{\"type\":\"all_chat_administrators\"},\"\"]": {
+      "scope": {
+        "type": "all_chat_administrators"
+      },
+      "language": "",
+      "before": [],
+      "expected": []
+    },
+    "[{\"type\":\"default\"},\"en\"]": {
+      "scope": {
+        "type": "default"
+      },
+      "language": "en",
+      "before": [],
+      "expected": []
+    },
+    "[{\"type\":\"all_private_chats\"},\"en\"]": {
+      "scope": {
+        "type": "all_private_chats"
+      },
+      "language": "en",
+      "before": [],
+      "expected": []
+    },
+    "[{\"type\":\"all_group_chats\"},\"en\"]": {
+      "scope": {
+        "type": "all_group_chats"
+      },
+      "language": "en",
+      "before": [],
+      "expected": []
+    },
+    "[{\"type\":\"all_chat_administrators\"},\"en\"]": {
+      "scope": {
+        "type": "all_chat_administrators"
+      },
+      "language": "en",
+      "before": [],
+      "expected": []
+    },
+    "[{\"type\":\"default\"},\"es\"]": {
+      "scope": {
+        "type": "default"
+      },
+      "language": "es",
+      "before": [],
+      "expected": []
+    },
+    "[{\"type\":\"all_private_chats\"},\"es\"]": {
+      "scope": {
+        "type": "all_private_chats"
+      },
+      "language": "es",
+      "before": [],
+      "expected": []
+    },
+    "[{\"type\":\"all_group_chats\"},\"es\"]": {
+      "scope": {
+        "type": "all_group_chats"
+      },
+      "language": "es",
+      "before": [],
+      "expected": []
+    },
+    "[{\"type\":\"all_chat_administrators\"},\"es\"]": {
+      "scope": {
+        "type": "all_chat_administrators"
+      },
+      "language": "es",
+      "before": [],
+      "expected": []
+    },
+    "[{\"chat_id\":957972425,\"type\":\"chat\"},\"\"]": {
+      "scope": {
+        "type": "chat",
+        "chat_id": 957972425
+      },
+      "language": "",
+      "before": [],
+      "expected": [
+        {
+          "command": "help",
+          "description": "Show available commands (/help skills lists skill commands, /help <text> filters)"
+        },
+        {
+          "command": "new",
+          "description": "Start a new session (fresh session ID + history)"
+        },
+        {
+          "command": "stop",
+          "description": "Kill all running background processes"
+        },
+        {
+          "command": "status",
+          "description": "Show session, model, token, and context info"
+        },
+        {
+          "command": "egress",
+          "description": "Show Docker egress proxy status"
+        },
+        {
+          "command": "resume",
+          "description": "Resume a previously-named session"
+        },
+        {
+          "command": "sessions",
+          "description": "Browse and resume previous sessions"
+        },
+        {
+          "command": "model",
+          "description": "Switch model (session-scoped; --global to persist)"
+        },
+        {
+          "command": "debug",
+          "description": "Upload debug report (system info + logs) and get shareable links"
+        },
+        {
+          "command": "restart",
+          "description": "Gracefully restart the gateway after draining active runs"
+        },
+        {
+          "command": "update",
+          "description": "Update Hermes Agent to the latest version"
+        },
+        {
+          "command": "commands",
+          "description": "Browse all commands and skills (paginated)"
+        },
+        {
+          "command": "approve",
+          "description": "Approve a pending dangerous command"
+        },
+        {
+          "command": "deny",
+          "description": "Deny a pending dangerous command (optionally with a reason)"
+        },
+        {
+          "command": "queue",
+          "description": "Queue a prompt for the next turn, or list/edit/rm/move/clear queued prompts"
+        },
+        {
+          "command": "steer",
+          "description": "Inject a message after the next tool call without interrupting"
+        },
+        {
+          "command": "bg",
+          "description": "Run a prompt in a separate background session"
+        },
+        {
+          "command": "btw",
+          "description": "Ask a side question about the current conversation without interrupting it"
+        },
+        {
+          "command": "reasoning",
+          "description": "Manage reasoning effort and display"
+        },
+        {
+          "command": "usage",
+          "description": "Show token usage and rate limits; `reset` redeems a banked Codex limit reset"
+        },
+        {
+          "command": "platform",
+          "description": "Pause, resume, or list a failing gateway platform"
+        },
+        {
+          "command": "profile",
+          "description": "Show active profile name and home directory"
+        },
+        {
+          "command": "whoami",
+          "description": "Show your slash command access (admin / user)"
+        },
+        {
+          "command": "start",
+          "description": "Acknowledge platform start pings without a reply"
+        },
+        {
+          "command": "topic",
+          "description": "Enable or inspect Telegram DM topic sessions"
+        },
+        {
+          "command": "save",
+          "description": "Export the current conversation (bare /save shows usage)"
+        },
+        {
+          "command": "retry",
+          "description": "Retry the last message (resend to agent)"
+        },
+        {
+          "command": "undo",
+          "description": "Back up N user turns and re-prompt (default 1)"
+        },
+        {
+          "command": "title",
+          "description": "Set a title for the current session"
+        },
+        {
+          "command": "branch",
+          "description": "Branch the current session (new thread on Discord/Telegram/Slack/Matrix; --here stays here)"
+        },
+        {
+          "command": "compress",
+          "description": "Compress conversation context (add 'here [N]' to keep recent N turns; --preview shows what would happen)"
+        },
+        {
+          "command": "rollback",
+          "description": "List or restore filesystem checkpoints (restores keep your hand-edits; --all overrides)"
+        },
+        {
+          "command": "pause",
+          "description": "Pause new work globally (emergency stop); '/pause off' resumes"
+        },
+        {
+          "command": "agents",
+          "description": "Show active agents and running tasks"
+        },
+        {
+          "command": "goal",
+          "description": "Set a standing goal Hermes works on across turns until achieved"
+        },
+        {
+          "command": "heartbeat",
+          "description": "Set a recurring prompt that re-enters this session when idle"
+        },
+        {
+          "command": "refine",
+          "description": "Review this conversation now and save lessons to memory/skills"
+        },
+        {
+          "command": "review",
+          "description": "Spawn an independent subagent to review the work just discussed (PR, code, docs)"
+        },
+        {
+          "command": "loop",
+          "description": "Re-run a prompt on a recurring interval in this session"
+        },
+        {
+          "command": "plan",
+          "description": "Write a markdown implementation plan to .hermes/plans/ without executing anything"
+        },
+        {
+          "command": "moa",
+          "description": "Run one prompt through the default Mixture of Agents preset, then restore your model"
+        },
+        {
+          "command": "subgoal",
+          "description": "Add or manage extra criteria on the active goal"
+        },
+        {
+          "command": "context",
+          "description": "Show detailed context window view with usage gauge, category breakdown, compression stats, and throughput"
+        },
+        {
+          "command": "sethome",
+          "description": "Set this chat as the home channel"
+        },
+        {
+          "command": "codex_runtime",
+          "description": "Toggle codex app-server runtime for OpenAI/Codex models"
+        },
+        {
+          "command": "personality",
+          "description": "Set a predefined personality"
+        },
+        {
+          "command": "diff",
+          "description": "Show git changes in the working directory"
+        },
+        {
+          "command": "footer",
+          "description": "Toggle gateway runtime-metadata footer on final replies"
+        },
+        {
+          "command": "yolo",
+          "description": "Toggle YOLO mode (skip all dangerous command approvals)"
+        },
+        {
+          "command": "approvals",
+          "description": "Show or set the persistent dangerous-command approval mode"
+        },
+        {
+          "command": "fast",
+          "description": "Fast mode - OpenAI Priority Processing / Anthropic Fast Mode (normal/fast/auto/cold)"
+        },
+        {
+          "command": "voice",
+          "description": "Toggle voice mode"
+        },
+        {
+          "command": "busy",
+          "description": "Control how messages behave while Hermes is working"
+        },
+        {
+          "command": "memory",
+          "description": "Review pending memory writes / toggle the approval gate"
+        },
+        {
+          "command": "bundles",
+          "description": "List skill bundles (aliases /<name> for multiple skills)"
+        },
+        {
+          "command": "learn",
+          "description": "Learn a reusable skill from anything you describe (dirs, URLs, this chat, notes)"
+        },
+        {
+          "command": "init",
+          "description": "Generate or update AGENTS.md project instructions from a repo scan"
+        },
+        {
+          "command": "suggestions",
+          "description": "Review suggested automations (accept/dismiss)"
+        },
+        {
+          "command": "blueprint",
+          "description": "Set up an automation from a blueprint template"
+        },
+        {
+          "command": "curator",
+          "description": "Background skill maintenance (status, run, pin, archive, list-archived)"
+        }
+      ]
+    },
+    "[{\"chat_id\":957972425,\"type\":\"chat\"},\"en\"]": {
+      "scope": {
+        "type": "chat",
+        "chat_id": 957972425
+      },
+      "language": "en",
+      "before": [],
+      "expected": [
+        {
+          "command": "help",
+          "description": "Show available commands (/help skills lists skill commands, /help <text> filters)"
+        },
+        {
+          "command": "new",
+          "description": "Start a new session (fresh session ID + history)"
+        },
+        {
+          "command": "stop",
+          "description": "Kill all running background processes"
+        },
+        {
+          "command": "status",
+          "description": "Show session, model, token, and context info"
+        },
+        {
+          "command": "egress",
+          "description": "Show Docker egress proxy status"
+        },
+        {
+          "command": "resume",
+          "description": "Resume a previously-named session"
+        },
+        {
+          "command": "sessions",
+          "description": "Browse and resume previous sessions"
+        },
+        {
+          "command": "model",
+          "description": "Switch model (session-scoped; --global to persist)"
+        },
+        {
+          "command": "debug",
+          "description": "Upload debug report (system info + logs) and get shareable links"
+        },
+        {
+          "command": "restart",
+          "description": "Gracefully restart the gateway after draining active runs"
+        },
+        {
+          "command": "update",
+          "description": "Update Hermes Agent to the latest version"
+        },
+        {
+          "command": "commands",
+          "description": "Browse all commands and skills (paginated)"
+        },
+        {
+          "command": "approve",
+          "description": "Approve a pending dangerous command"
+        },
+        {
+          "command": "deny",
+          "description": "Deny a pending dangerous command (optionally with a reason)"
+        },
+        {
+          "command": "queue",
+          "description": "Queue a prompt for the next turn, or list/edit/rm/move/clear queued prompts"
+        },
+        {
+          "command": "steer",
+          "description": "Inject a message after the next tool call without interrupting"
+        },
+        {
+          "command": "bg",
+          "description": "Run a prompt in a separate background session"
+        },
+        {
+          "command": "btw",
+          "description": "Ask a side question about the current conversation without interrupting it"
+        },
+        {
+          "command": "reasoning",
+          "description": "Manage reasoning effort and display"
+        },
+        {
+          "command": "usage",
+          "description": "Show token usage and rate limits; `reset` redeems a banked Codex limit reset"
+        },
+        {
+          "command": "platform",
+          "description": "Pause, resume, or list a failing gateway platform"
+        },
+        {
+          "command": "profile",
+          "description": "Show active profile name and home directory"
+        },
+        {
+          "command": "whoami",
+          "description": "Show your slash command access (admin / user)"
+        },
+        {
+          "command": "start",
+          "description": "Acknowledge platform start pings without a reply"
+        },
+        {
+          "command": "topic",
+          "description": "Enable or inspect Telegram DM topic sessions"
+        },
+        {
+          "command": "save",
+          "description": "Export the current conversation (bare /save shows usage)"
+        },
+        {
+          "command": "retry",
+          "description": "Retry the last message (resend to agent)"
+        },
+        {
+          "command": "undo",
+          "description": "Back up N user turns and re-prompt (default 1)"
+        },
+        {
+          "command": "title",
+          "description": "Set a title for the current session"
+        },
+        {
+          "command": "branch",
+          "description": "Branch the current session (new thread on Discord/Telegram/Slack/Matrix; --here stays here)"
+        },
+        {
+          "command": "compress",
+          "description": "Compress conversation context (add 'here [N]' to keep recent N turns; --preview shows what would happen)"
+        },
+        {
+          "command": "rollback",
+          "description": "List or restore filesystem checkpoints (restores keep your hand-edits; --all overrides)"
+        },
+        {
+          "command": "pause",
+          "description": "Pause new work globally (emergency stop); '/pause off' resumes"
+        },
+        {
+          "command": "agents",
+          "description": "Show active agents and running tasks"
+        },
+        {
+          "command": "goal",
+          "description": "Set a standing goal Hermes works on across turns until achieved"
+        },
+        {
+          "command": "heartbeat",
+          "description": "Set a recurring prompt that re-enters this session when idle"
+        },
+        {
+          "command": "refine",
+          "description": "Review this conversation now and save lessons to memory/skills"
+        },
+        {
+          "command": "review",
+          "description": "Spawn an independent subagent to review the work just discussed (PR, code, docs)"
+        },
+        {
+          "command": "loop",
+          "description": "Re-run a prompt on a recurring interval in this session"
+        },
+        {
+          "command": "plan",
+          "description": "Write a markdown implementation plan to .hermes/plans/ without executing anything"
+        },
+        {
+          "command": "moa",
+          "description": "Run one prompt through the default Mixture of Agents preset, then restore your model"
+        },
+        {
+          "command": "subgoal",
+          "description": "Add or manage extra criteria on the active goal"
+        },
+        {
+          "command": "context",
+          "description": "Show detailed context window view with usage gauge, category breakdown, compression stats, and throughput"
+        },
+        {
+          "command": "sethome",
+          "description": "Set this chat as the home channel"
+        },
+        {
+          "command": "codex_runtime",
+          "description": "Toggle codex app-server runtime for OpenAI/Codex models"
+        },
+        {
+          "command": "personality",
+          "description": "Set a predefined personality"
+        },
+        {
+          "command": "diff",
+          "description": "Show git changes in the working directory"
+        },
+        {
+          "command": "footer",
+          "description": "Toggle gateway runtime-metadata footer on final replies"
+        },
+        {
+          "command": "yolo",
+          "description": "Toggle YOLO mode (skip all dangerous command approvals)"
+        },
+        {
+          "command": "approvals",
+          "description": "Show or set the persistent dangerous-command approval mode"
+        },
+        {
+          "command": "fast",
+          "description": "Fast mode - OpenAI Priority Processing / Anthropic Fast Mode (normal/fast/auto/cold)"
+        },
+        {
+          "command": "voice",
+          "description": "Toggle voice mode"
+        },
+        {
+          "command": "busy",
+          "description": "Control how messages behave while Hermes is working"
+        },
+        {
+          "command": "memory",
+          "description": "Review pending memory writes / toggle the approval gate"
+        },
+        {
+          "command": "bundles",
+          "description": "List skill bundles (aliases /<name> for multiple skills)"
+        },
+        {
+          "command": "learn",
+          "description": "Learn a reusable skill from anything you describe (dirs, URLs, this chat, notes)"
+        },
+        {
+          "command": "init",
+          "description": "Generate or update AGENTS.md project instructions from a repo scan"
+        },
+        {
+          "command": "suggestions",
+          "description": "Review suggested automations (accept/dismiss)"
+        },
+        {
+          "command": "blueprint",
+          "description": "Set up an automation from a blueprint template"
+        },
+        {
+          "command": "curator",
+          "description": "Background skill maintenance (status, run, pin, archive, list-archived)"
+        }
+      ]
+    },
+    "[{\"chat_id\":957972425,\"type\":\"chat\"},\"es\"]": {
+      "scope": {
+        "type": "chat",
+        "chat_id": 957972425
+      },
+      "language": "es",
+      "before": [],
+      "expected": [
+        {
+          "command": "help",
+          "description": "Show available commands (/help skills lists skill commands, /help <text> filters)"
+        },
+        {
+          "command": "new",
+          "description": "Start a new session (fresh session ID + history)"
+        },
+        {
+          "command": "stop",
+          "description": "Kill all running background processes"
+        },
+        {
+          "command": "status",
+          "description": "Show session, model, token, and context info"
+        },
+        {
+          "command": "egress",
+          "description": "Show Docker egress proxy status"
+        },
+        {
+          "command": "resume",
+          "description": "Resume a previously-named session"
+        },
+        {
+          "command": "sessions",
+          "description": "Browse and resume previous sessions"
+        },
+        {
+          "command": "model",
+          "description": "Switch model (session-scoped; --global to persist)"
+        },
+        {
+          "command": "debug",
+          "description": "Upload debug report (system info + logs) and get shareable links"
+        },
+        {
+          "command": "restart",
+          "description": "Gracefully restart the gateway after draining active runs"
+        },
+        {
+          "command": "update",
+          "description": "Update Hermes Agent to the latest version"
+        },
+        {
+          "command": "commands",
+          "description": "Browse all commands and skills (paginated)"
+        },
+        {
+          "command": "approve",
+          "description": "Approve a pending dangerous command"
+        },
+        {
+          "command": "deny",
+          "description": "Deny a pending dangerous command (optionally with a reason)"
+        },
+        {
+          "command": "queue",
+          "description": "Queue a prompt for the next turn, or list/edit/rm/move/clear queued prompts"
+        },
+        {
+          "command": "steer",
+          "description": "Inject a message after the next tool call without interrupting"
+        },
+        {
+          "command": "bg",
+          "description": "Run a prompt in a separate background session"
+        },
+        {
+          "command": "btw",
+          "description": "Ask a side question about the current conversation without interrupting it"
+        },
+        {
+          "command": "reasoning",
+          "description": "Manage reasoning effort and display"
+        },
+        {
+          "command": "usage",
+          "description": "Show token usage and rate limits; `reset` redeems a banked Codex limit reset"
+        },
+        {
+          "command": "platform",
+          "description": "Pause, resume, or list a failing gateway platform"
+        },
+        {
+          "command": "profile",
+          "description": "Show active profile name and home directory"
+        },
+        {
+          "command": "whoami",
+          "description": "Show your slash command access (admin / user)"
+        },
+        {
+          "command": "start",
+          "description": "Acknowledge platform start pings without a reply"
+        },
+        {
+          "command": "topic",
+          "description": "Enable or inspect Telegram DM topic sessions"
+        },
+        {
+          "command": "save",
+          "description": "Export the current conversation (bare /save shows usage)"
+        },
+        {
+          "command": "retry",
+          "description": "Retry the last message (resend to agent)"
+        },
+        {
+          "command": "undo",
+          "description": "Back up N user turns and re-prompt (default 1)"
+        },
+        {
+          "command": "title",
+          "description": "Set a title for the current session"
+        },
+        {
+          "command": "branch",
+          "description": "Branch the current session (new thread on Discord/Telegram/Slack/Matrix; --here stays here)"
+        },
+        {
+          "command": "compress",
+          "description": "Compress conversation context (add 'here [N]' to keep recent N turns; --preview shows what would happen)"
+        },
+        {
+          "command": "rollback",
+          "description": "List or restore filesystem checkpoints (restores keep your hand-edits; --all overrides)"
+        },
+        {
+          "command": "pause",
+          "description": "Pause new work globally (emergency stop); '/pause off' resumes"
+        },
+        {
+          "command": "agents",
+          "description": "Show active agents and running tasks"
+        },
+        {
+          "command": "goal",
+          "description": "Set a standing goal Hermes works on across turns until achieved"
+        },
+        {
+          "command": "heartbeat",
+          "description": "Set a recurring prompt that re-enters this session when idle"
+        },
+        {
+          "command": "refine",
+          "description": "Review this conversation now and save lessons to memory/skills"
+        },
+        {
+          "command": "review",
+          "description": "Spawn an independent subagent to review the work just discussed (PR, code, docs)"
+        },
+        {
+          "command": "loop",
+          "description": "Re-run a prompt on a recurring interval in this session"
+        },
+        {
+          "command": "plan",
+          "description": "Write a markdown implementation plan to .hermes/plans/ without executing anything"
+        },
+        {
+          "command": "moa",
+          "description": "Run one prompt through the default Mixture of Agents preset, then restore your model"
+        },
+        {
+          "command": "subgoal",
+          "description": "Add or manage extra criteria on the active goal"
+        },
+        {
+          "command": "context",
+          "description": "Show detailed context window view with usage gauge, category breakdown, compression stats, and throughput"
+        },
+        {
+          "command": "sethome",
+          "description": "Set this chat as the home channel"
+        },
+        {
+          "command": "codex_runtime",
+          "description": "Toggle codex app-server runtime for OpenAI/Codex models"
+        },
+        {
+          "command": "personality",
+          "description": "Set a predefined personality"
+        },
+        {
+          "command": "diff",
+          "description": "Show git changes in the working directory"
+        },
+        {
+          "command": "footer",
+          "description": "Toggle gateway runtime-metadata footer on final replies"
+        },
+        {
+          "command": "yolo",
+          "description": "Toggle YOLO mode (skip all dangerous command approvals)"
+        },
+        {
+          "command": "approvals",
+          "description": "Show or set the persistent dangerous-command approval mode"
+        },
+        {
+          "command": "fast",
+          "description": "Fast mode - OpenAI Priority Processing / Anthropic Fast Mode (normal/fast/auto/cold)"
+        },
+        {
+          "command": "voice",
+          "description": "Toggle voice mode"
+        },
+        {
+          "command": "busy",
+          "description": "Control how messages behave while Hermes is working"
+        },
+        {
+          "command": "memory",
+          "description": "Review pending memory writes / toggle the approval gate"
+        },
+        {
+          "command": "bundles",
+          "description": "List skill bundles (aliases /<name> for multiple skills)"
+        },
+        {
+          "command": "learn",
+          "description": "Learn a reusable skill from anything you describe (dirs, URLs, this chat, notes)"
+        },
+        {
+          "command": "init",
+          "description": "Generate or update AGENTS.md project instructions from a repo scan"
+        },
+        {
+          "command": "suggestions",
+          "description": "Review suggested automations (accept/dismiss)"
+        },
+        {
+          "command": "blueprint",
+          "description": "Set up an automation from a blueprint template"
+        },
+        {
+          "command": "curator",
+          "description": "Background skill maintenance (status, run, pin, archive, list-archived)"
+        }
+      ]
+    },
+    "[{\"chat_id\":1885476450,\"type\":\"chat\"},\"\"]": {
+      "scope": {
+        "type": "chat",
+        "chat_id": 1885476450
+      },
+      "language": "",
+      "before": [],
+      "expected": []
+    },
+    "[{\"chat_id\":1885476450,\"type\":\"chat\"},\"en\"]": {
+      "scope": {
+        "type": "chat",
+        "chat_id": 1885476450
+      },
+      "language": "en",
+      "before": [],
+      "expected": []
+    },
+    "[{\"chat_id\":1885476450,\"type\":\"chat\"},\"es\"]": {
+      "scope": {
+        "type": "chat",
+        "chat_id": 1885476450
+      },
+      "language": "es",
+      "before": [],
+      "expected": []
+    },
+    "[{\"chat_id\":1303594479,\"type\":\"chat\"},\"\"]": {
+      "scope": {
+        "type": "chat",
+        "chat_id": 1303594479
+      },
+      "language": "",
+      "before": [],
+      "expected": []
+    },
+    "[{\"chat_id\":1303594479,\"type\":\"chat\"},\"en\"]": {
+      "scope": {
+        "type": "chat",
+        "chat_id": 1303594479
+      },
+      "language": "en",
+      "before": [],
+      "expected": []
+    },
+    "[{\"chat_id\":1303594479,\"type\":\"chat\"},\"es\"]": {
+      "scope": {
+        "type": "chat",
+        "chat_id": 1303594479
+      },
+      "language": "es",
+      "before": [],
+      "expected": []
+    }
+  },
+  "admin_source": {
+    "": [
+      {
+        "command": "help",
+        "description": "Show available commands (/help skills lists skill commands, /help <text> filters)"
+      },
+      {
+        "command": "new",
+        "description": "Start a new session (fresh session ID + history)"
+      },
+      {
+        "command": "stop",
+        "description": "Kill all running background processes"
+      },
+      {
+        "command": "status",
+        "description": "Show session, model, token, and context info"
+      },
+      {
+        "command": "egress",
+        "description": "Show Docker egress proxy status"
+      },
+      {
+        "command": "resume",
+        "description": "Resume a previously-named session"
+      },
+      {
+        "command": "sessions",
+        "description": "Browse and resume previous sessions"
+      },
+      {
+        "command": "model",
+        "description": "Switch model (session-scoped; --global to persist)"
+      },
+      {
+        "command": "debug",
+        "description": "Upload debug report (system info + logs) and get shareable links"
+      },
+      {
+        "command": "restart",
+        "description": "Gracefully restart the gateway after draining active runs"
+      },
+      {
+        "command": "update",
+        "description": "Update Hermes Agent to the latest version"
+      },
+      {
+        "command": "commands",
+        "description": "Browse all commands and skills (paginated)"
+      },
+      {
+        "command": "approve",
+        "description": "Approve a pending dangerous command"
+      },
+      {
+        "command": "deny",
+        "description": "Deny a pending dangerous command (optionally with a reason)"
+      },
+      {
+        "command": "queue",
+        "description": "Queue a prompt for the next turn, or list/edit/rm/move/clear queued prompts"
+      },
+      {
+        "command": "steer",
+        "description": "Inject a message after the next tool call without interrupting"
+      },
+      {
+        "command": "bg",
+        "description": "Run a prompt in a separate background session"
+      },
+      {
+        "command": "btw",
+        "description": "Ask a side question about the current conversation without interrupting it"
+      },
+      {
+        "command": "reasoning",
+        "description": "Manage reasoning effort and display"
+      },
+      {
+        "command": "usage",
+        "description": "Show token usage and rate limits; `reset` redeems a banked Codex limit reset"
+      },
+      {
+        "command": "platform",
+        "description": "Pause, resume, or list a failing gateway platform"
+      },
+      {
+        "command": "profile",
+        "description": "Show active profile name and home directory"
+      },
+      {
+        "command": "whoami",
+        "description": "Show your slash command access (admin / user)"
+      },
+      {
+        "command": "start",
+        "description": "Acknowledge platform start pings without a reply"
+      },
+      {
+        "command": "topic",
+        "description": "Enable or inspect Telegram DM topic sessions"
+      },
+      {
+        "command": "save",
+        "description": "Export the current conversation (bare /save shows usage)"
+      },
+      {
+        "command": "retry",
+        "description": "Retry the last message (resend to agent)"
+      },
+      {
+        "command": "undo",
+        "description": "Back up N user turns and re-prompt (default 1)"
+      },
+      {
+        "command": "title",
+        "description": "Set a title for the current session"
+      },
+      {
+        "command": "branch",
+        "description": "Branch the current session (new thread on Discord/Telegram/Slack/Matrix; --here stays here)"
+      },
+      {
+        "command": "compress",
+        "description": "Compress conversation context (add 'here [N]' to keep recent N turns; --preview shows what would happen)"
+      },
+      {
+        "command": "rollback",
+        "description": "List or restore filesystem checkpoints (restores keep your hand-edits; --all overrides)"
+      },
+      {
+        "command": "pause",
+        "description": "Pause new work globally (emergency stop); '/pause off' resumes"
+      },
+      {
+        "command": "agents",
+        "description": "Show active agents and running tasks"
+      },
+      {
+        "command": "goal",
+        "description": "Set a standing goal Hermes works on across turns until achieved"
+      },
+      {
+        "command": "heartbeat",
+        "description": "Set a recurring prompt that re-enters this session when idle"
+      },
+      {
+        "command": "refine",
+        "description": "Review this conversation now and save lessons to memory/skills"
+      },
+      {
+        "command": "review",
+        "description": "Spawn an independent subagent to review the work just discussed (PR, code, docs)"
+      },
+      {
+        "command": "loop",
+        "description": "Re-run a prompt on a recurring interval in this session"
+      },
+      {
+        "command": "plan",
+        "description": "Write a markdown implementation plan to .hermes/plans/ without executing anything"
+      },
+      {
+        "command": "moa",
+        "description": "Run one prompt through the default Mixture of Agents preset, then restore your model"
+      },
+      {
+        "command": "subgoal",
+        "description": "Add or manage extra criteria on the active goal"
+      },
+      {
+        "command": "context",
+        "description": "Show detailed context window view with usage gauge, category breakdown, compression stats, and throughput"
+      },
+      {
+        "command": "sethome",
+        "description": "Set this chat as the home channel"
+      },
+      {
+        "command": "codex_runtime",
+        "description": "Toggle codex app-server runtime for OpenAI/Codex models"
+      },
+      {
+        "command": "personality",
+        "description": "Set a predefined personality"
+      },
+      {
+        "command": "diff",
+        "description": "Show git changes in the working directory"
+      },
+      {
+        "command": "footer",
+        "description": "Toggle gateway runtime-metadata footer on final replies"
+      },
+      {
+        "command": "yolo",
+        "description": "Toggle YOLO mode (skip all dangerous command approvals)"
+      },
+      {
+        "command": "approvals",
+        "description": "Show or set the persistent dangerous-command approval mode"
+      },
+      {
+        "command": "fast",
+        "description": "Fast mode - OpenAI Priority Processing / Anthropic Fast Mode (normal/fast/auto/cold)"
+      },
+      {
+        "command": "voice",
+        "description": "Toggle voice mode"
+      },
+      {
+        "command": "busy",
+        "description": "Control how messages behave while Hermes is working"
+      },
+      {
+        "command": "memory",
+        "description": "Review pending memory writes / toggle the approval gate"
+      },
+      {
+        "command": "bundles",
+        "description": "List skill bundles (aliases /<name> for multiple skills)"
+      },
+      {
+        "command": "learn",
+        "description": "Learn a reusable skill from anything you describe (dirs, URLs, this chat, notes)"
+      },
+      {
+        "command": "init",
+        "description": "Generate or update AGENTS.md project instructions from a repo scan"
+      },
+      {
+        "command": "suggestions",
+        "description": "Review suggested automations (accept/dismiss)"
+      },
+      {
+        "command": "blueprint",
+        "description": "Set up an automation from a blueprint template"
+      },
+      {
+        "command": "curator",
+        "description": "Background skill maintenance (status, run, pin, archive, list-archived)"
+      }
+    ]
+  }
+}
