@@ -1,0 +1,4 @@
+name: rag-memory-preload
+description: Preload original RAG embeddings inside the gateway process
+events:
+  - gateway:startup

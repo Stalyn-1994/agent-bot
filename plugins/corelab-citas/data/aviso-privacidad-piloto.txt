@@ -1,0 +1,25 @@
+CORELAB - AVISO DE TRATAMIENTO DE DATOS
+Versión piloto-2026-10-23.1
+PILOTO DEMOSTRATIVO - UTILIZA DATOS FICTICIOS
+Este borrador no sustituye la política definitiva de Corelab.
+
+1. Quién organiza el piloto
+Corelab Laboratorio Clínico. Su razón social, domicilio y contacto formal de privacidad están pendientes de confirmar. Para consultas o solicitudes sobre tus datos, pide atención humana en este bot.
+
+2. Qué datos se registran y para qué
+Nombre del paciente, cédula, teléfono, identificador de la cuenta de Telegram y datos de la cita. Se utilizan para gestionar reservas y cancelaciones, contactar al paciente, avisar al asesor y demostrar las decisiones de autorización. No se solicitan resultados, diagnósticos ni documentos clínicos; no se autoriza publicidad.
+
+3. Cómo se registra tu decisión
+Después de recibir este PDF eliges “Autorizo mis datos” o “No autorizo”. Se registra la decisión, fecha y hora, cuenta de Telegram, versión del aviso y referencias de los mensajes y botones. Los datos de la cita quedan vinculados a esa evidencia en una base privada de reservas y auditoría. La entrega del PDF no demuestra que lo hayas leído.
+
+4. Quién recibe o procesa la información
+El personal autorizado recibe nombre, cédula y teléfono en el aviso privado. Los mensajes pasan por Telegram, Hermes y el proveedor del modelo configurado. Google Calendar recibe el código y horario de la reserva, sin nombre, cédula ni teléfono en el evento. Las condiciones de estos proveedores y posibles transferencias internacionales deben precisarse antes de usar datos reales.
+
+5. Tu elección y su alcance
+La autorización se recuerda para tu cuenta en futuras reservas con este mismo aviso; no se solicita en cada cita. Cubre tus propios datos: no acredita representación ni consentimiento de otra persona. Para citas de terceros o menores solicita atención humana. Si rechazas, no se solicitan los datos de la cita ni se continúa el agendamiento por el bot; puedes consultar información general o contactar al laboratorio.
+
+6. Conservación y protección
+En esta demostración no hay borrado automático ni plazo de conservación definido. Esto es un pendiente del piloto y no una autorización para guardar datos reales indefinidamente. La base local y sus respaldos requieren acceso restringido; los datos no se incorporan al RAG. Deben definirse el plazo y las medidas definitivas antes del uso con datos reales.
+
+7. Retirar la autorización y ejercer derechos
+Puedes escribir “Quiero retirar mi autorización” para recibir el botón correspondiente. El retiro bloquea nuevas solicitudes; no cancela automáticamente una cita ya confirmada ni elimina por sí solo el historial. Para acceso, rectificación, eliminación u otras solicitudes pide atención humana. No se te pide renunciar a tus derechos.
