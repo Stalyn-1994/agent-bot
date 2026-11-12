@@ -12,6 +12,7 @@ from pathlib import Path
 import re
 import sqlite3
 import time
+from .delivery import shared
 
 from .common import atomic_json, fingerprint, read_json
 
@@ -113,7 +114,9 @@ class Menus:
             bot_id = self.bot.id
         except RuntimeError:
             bot_id = None  # Native Application has not completed initialize() yet.
-        atomic_json(self.status_path, {"stage": stage, "pid": os.getpid(),
+        atomic_json(self.status_path, {"stage": stage, "version": "1.4.0",
+            "gateway_single_delivery": shared().ready(), "pid": os.getpid(),
+            "native_navigation": shared().ready(), "model_presentation_tool":False,
             "process_fingerprint": fingerprint(os.getpid()), "bot_id": bot_id,
             "checked_at": datetime.now(timezone.utc).isoformat(),
             "admin_menus": len(self.admins), "operator_menus": len(self.operators),

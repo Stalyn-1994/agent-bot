@@ -6,9 +6,10 @@ import os
 from pathlib import Path
 from threading import Lock
 from .catalog import Catalog
+from .delivery import Delivery, identity
 
 plugin_name = "corelab-cotizador"
-plugin_version = "1.0.1"
+plugin_version = "1.1.1"
 
 
 def _request(args):
@@ -26,7 +27,7 @@ def _request(args):
 
 
 def register(ctx):
-    if not callable(getattr(ctx, "register_tool", None)):
+    if any(not callable(getattr(ctx,name,None)) for name in ("register_tool","register_platform_handler")):
         raise RuntimeError("Esta version de Hermes no admite herramientas de plugin")
     # The same Markdown catalogues indexed by RAG remain the sole runtime source.
     # The bundled copies exist for verification and reproducible package tests.
@@ -34,6 +35,8 @@ def register(ctx):
     # Register schemas without requiring live profile data. Resolve this profile
     # once and load its catalogue only when an actual quotation is requested.
     directory = Path(os.environ["HERMES_HOME"]).resolve() / "agent-knowledge"
+    delivery = Delivery()
+    ctx.register_platform_handler("telegram", delivery.wire)
     catalog = None
     lock = Lock()
 
@@ -47,6 +50,8 @@ def register(ctx):
     def quote(args, **_kwargs):
         try:
             exams, payment = _request(args)
+            owner = identity()
+            delivery.remember(owner, None)
             if payment == "efectivo":
                 return json.dumps({
                     "success": True,
@@ -60,7 +65,11 @@ def register(ctx):
                     "mensaje_para_cliente": "El valor en efectivo debe validarse con una persona de Corelab antes de cotizarlo.",
                     "nota": "La cartera recibida identifica precio de tarjeta y precio con descuento, pero no confirma que el descuento corresponda a efectivo.",
                 }, ensure_ascii=False)
-            return json.dumps(get_catalog().quote(exams), ensure_ascii=False)
+            result = get_catalog().quote(exams)
+            code = delivery.remember(owner, result)
+            if code:
+                result["codigo_pdf"] = code
+            return json.dumps(result, ensure_ascii=False)
         except ValueError as exc:
             return json.dumps({"success": False, "error": str(exc)}, ensure_ascii=False)
         except (OSError, RuntimeError) as exc:
@@ -83,3 +92,15 @@ def register(ctx):
                            "required": ["examenes", "modalidad_pago"]},
         },
     )
+
+
+    def pdf(args, **_kwargs):
+        return json.dumps(delivery.decision(args), ensure_ascii=False)
+
+    ctx.register_tool(name="gestionar_pdf_cotizacion", toolset="corelab_cotizador", handler=pdf,
+        schema={"name":"gestionar_pdf_cotizacion",
+                "description":"Envía el PDF de la cotización ya mostrada solo si el cliente lo pide o acepta expresamente. Descarta la oferta si el cliente la rechaza. Usa el codigo_pdf exacto de cotizar_examenes; nunca lo muestres ni inventes.",
+                "parameters":{"type":"object","additionalProperties":False,
+                  "properties":{"accion":{"type":"string","enum":["enviar","descartar"]},
+                                "codigo":{"type":"string"}},
+                  "required":["accion","codigo"]}})

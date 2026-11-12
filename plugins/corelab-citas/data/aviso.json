@@ -1,11 +1,10 @@
 {
-  "version": "piloto-2026-10-23.1",
-  "pdf": "aviso-privacidad-piloto.pdf",
-  "text": "aviso-privacidad-piloto.txt",
-  "pdf_sha256": "ef3af76387b19cb75782207af8306177acab1c0b21027621f33756af025e61ee",
-  "text_sha256": "b1899c2444f8c02cb7f40cd602c8810ed110c28bd1ae45c8e03cd222829b2e10",
-  "status": "demonstration_draft",
-  "test_data_only": true,
+  "version": "corelab-2026-11-03.1",
+  "pdf": "aviso-privacidad.pdf",
+  "text": "aviso-privacidad.txt",
+  "pdf_sha256": "6dd092feff1aa3d3f4992c0514f61d9fb6799ba9c5f4eeb6120499d4a8e46d3a",
+  "text_sha256": "6289d00aa144ad5e4ee7fb5aa1283b75db34054a869f21a10ef37a205b5ebd44",
+  "status": "informational_notice",
   "retention_period": null,
   "automatic_deletion": false
 }

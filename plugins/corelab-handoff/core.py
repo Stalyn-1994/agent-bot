@@ -5,12 +5,39 @@ import json
 import logging
 import threading
 import time
+import unicodedata
 from .store import Store
 
 logger = logging.getLogger("corelab_handoff")
 REASONS = {"customer_request", "knowledge_missing", "staff_confirmation", "clinical_question"}
 REASON_LABELS = {"customer_request": "Solicitud del cliente", "knowledge_missing": "Información no confirmada",
                  "staff_confirmation": "Confirmación del personal", "clinical_question": "Consulta clínica"}
+
+
+def display_label(value):
+    """A short, single-line Telegram display name; never an authorization value."""
+    if not isinstance(value, str):
+        return ""
+    value = unicodedata.normalize("NFC", value[:1024])
+    value = "".join(" " if ch.isspace() else ch for ch in value
+                    if unicodedata.category(ch) not in {"Cc", "Cf", "Cs"} or ch.isspace() or ch == "\u200d")
+    value = " ".join(value.split())
+    # Conservative UTF-16 budget leaves space for the case ID and closed label,
+    # including names containing supplementary-plane emoji.
+    result, units = [], 0
+    for ch in value:
+        width = 2 if ord(ch) > 0xFFFF else 1
+        if units + width > 80:
+            break
+        result.append(ch)
+        units += width
+    return "".join(result).strip().rstrip("\u200d")
+
+
+def topic_title(case_id, label="", closed=False):
+    name = display_label(label)
+    title = (name + " · " if name else "") + "Caso " + case_id
+    return ("Cerrado · " if closed else "") + title
 
 
 def bound_identity():
@@ -112,6 +139,26 @@ class Runtime:
             InlineKeyboardButton("Cerrar caso", callback_data="clh:close:" + case_id),
         ]])
 
+    async def customer_label(self, identity):
+        """Fetch only the host-bound customer's Telegram profile, never model text."""
+        if identity["chat_id"] != identity["user_id"]:
+            return ""
+        try:
+            chat = await asyncio.wait_for(self.bot.get_chat(identity["chat_id"],
+                connect_timeout=5, read_timeout=5, write_timeout=5, pool_timeout=5), timeout=7)
+            if chat.id != identity["chat_id"] or chat.type != "private":
+                return ""
+            parts = [getattr(chat, key, "") for key in ("first_name", "last_name")]
+            name = display_label(" ".join(part for part in parts if isinstance(part, str)))
+            if not name:
+                username = getattr(chat, "username", None)
+                name = display_label("@" + username) if isinstance(username, str) and username else ""
+            return name
+        except Exception:
+            # Cosmetic lookup failure must not deny or misroute a handoff.
+            logger.warning("Customer display name unavailable; using case reference")
+            return ""
+
     async def request(self, identity, reason, summary):
         routing = self.store.config()
         if not routing or routing.get("bot_id") != self.bot.id:
@@ -127,11 +174,14 @@ class Runtime:
                 try:
                     destination, thread = routing["group_id"], None
                     route = self.store.private_route(case["id"])
+                    label = ""
                     if route:
                         destination = route["operator_chat"]
                         self.store.authorize_private(self.bot.id, destination, case["operator_id"])
+                        label = await self.customer_label(identity)
+                        self.store.set_case_label(case["id"], label)
                         topic = await asyncio.wait_for(self.bot.create_forum_topic(chat_id=destination,
-                            name="Caso " + case["id"], connect_timeout=5, read_timeout=8,
+                            name=topic_title(case["id"], label), connect_timeout=5, read_timeout=8,
                             write_timeout=5, pool_timeout=5), timeout=12)
                         thread = topic.message_thread_id
                         self.store.set_topic(case["id"], destination, thread)
@@ -140,7 +190,8 @@ class Runtime:
                         "Pulsa Tomar caso. Despues usa Responder sobre este mensaje o sobre "
                         "un mensaje del cliente reenviado por el bot. Solo texto, hasta 3500 caracteres.")
                     sent = await self.send(destination,
-                        f"Caso {case['id']}\nMotivo: {REASON_LABELS[reason]}\nResumen: {summary}\n\n"
+                        f"Caso {case['id']}\n" + (f"Cliente (Telegram): {label}\n" if label else "")
+                        + f"Motivo: {REASON_LABELS[reason]}\nResumen: {summary}\n\n"
                         + instructions,
                         buttons=self.buttons(case["id"]), thread=thread)
                     self.store.route(self.bot.id, destination, sent.message_id, case["id"])
@@ -171,7 +222,7 @@ class Runtime:
                 raise RuntimeError("La herramienta requiere el trabajador de herramientas de Hermes")
             future = asyncio.run_coroutine_threadsafe(self.request(identity, reason, summary.strip()), self.loop)
             try:
-                result = future.result(timeout=50)
+                result = future.result(timeout=60)
             except TimeoutError:
                 # Do not start another send or claim a delivery we did not observe.
                 return json.dumps({"success": False, "error": "No se pudo confirmar la derivacion a tiempo"})
@@ -308,7 +359,8 @@ class Runtime:
                     await self.send(route["operator_chat"], "Caso cerrado. El cliente vuelve al asistente automático.",
                                     thread=route["operator_topic"])
                     await asyncio.wait_for(self.bot.edit_forum_topic(chat_id=route["operator_chat"],
-                        message_thread_id=route["operator_topic"], name="Cerrado · Caso " + case_id,
+                        message_thread_id=route["operator_topic"],
+                        name=topic_title(case_id, self.store.case_label(case_id), closed=True),
                         connect_timeout=5, read_timeout=8,
                         write_timeout=5, pool_timeout=5), timeout=12)
                 except Exception:

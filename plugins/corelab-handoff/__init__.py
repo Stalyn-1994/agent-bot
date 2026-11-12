@@ -6,7 +6,7 @@ from pathlib import Path
 from .core import Runtime
 
 plugin_name = "corelab-handoff"
-plugin_version = "2.0.1"
+plugin_version = "2.1.0"
 logger = logging.getLogger("corelab_handoff")
 _runtimes = {}
 
@@ -91,7 +91,9 @@ def register(ctx):
                 if command == "/atencion_casos":
                     cases = [c for c in runtime.store.open_cases() if c["operator_id"] == update.effective_user.id
                              and runtime.store.private_route(c["id"])]
-                    lines = [f"Caso {c['id']} · {c['state']}" for c in cases]
+                    from .core import topic_title
+                    lines = [topic_title(c['id'], runtime.store.case_label(c['id'])) + f" · {c['state']}"
+                             for c in cases]
                     await message.reply_text("Tus casos abiertos:\n" + "\n".join(lines[:40])
                         if lines else "No tienes casos abiertos.", parse_mode=None)
                 elif command.startswith("/"):

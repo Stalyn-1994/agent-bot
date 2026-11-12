@@ -45,6 +45,8 @@ class Store:
                     case_id TEXT PRIMARY KEY, operator_chat INTEGER NOT NULL,
                     operator_topic INTEGER,
                     UNIQUE(operator_chat,operator_topic));
+                CREATE TABLE IF NOT EXISTS case_labels(
+                    case_id TEXT PRIMARY KEY, display_name TEXT NOT NULL);
             ''')
 
     @contextmanager
@@ -232,6 +234,16 @@ class Store:
         with self.connection(write=True) as conn:
             conn.execute("UPDATE deliveries SET state=?,error=? WHERE key=?",
                          ("sent" if success else "failed", error, key))
+
+    def set_case_label(self, case_id, label):
+        with self.connection(write=True) as conn:
+            conn.execute("INSERT OR IGNORE INTO case_labels(case_id,display_name) VALUES(?,?)",
+                         (case_id, label))
+
+    def case_label(self, case_id):
+        with self.connection() as conn:
+            row = conn.execute("SELECT display_name FROM case_labels WHERE case_id=?", (case_id,)).fetchone()
+            return row[0] if row else ""
 
     def open_cases(self):
         with self.connection() as conn:

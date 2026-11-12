@@ -7,7 +7,7 @@ from pathlib import Path
 import time
 import uuid
 
-NOTICE_VERSION = "piloto-2026-10-23.1"
+NOTICE_VERSION = "corelab-2026-11-03.1"
 
 
 class ConsentRequired(ValueError):
@@ -30,11 +30,11 @@ class Notice:
     def read(cls):
         directory=Path(__file__).parent/"data"
         info=json.loads((directory/"aviso.json").read_text(encoding="utf-8"))
-        if info.get("version")!=NOTICE_VERSION or info.get("status")!="demonstration_draft":
-            raise RuntimeError("El aviso del piloto no corresponde a esta version")
+        if info.get("version")!=NOTICE_VERSION or info.get("status")!="informational_notice":
+            raise RuntimeError("El aviso de privacidad no corresponde a esta version")
         # Fixed filenames prevent a modified manifest from choosing arbitrary host files.
-        pdf=(directory/"aviso-privacidad-piloto.pdf").read_bytes()
-        raw=(directory/"aviso-privacidad-piloto.txt").read_bytes()
+        pdf=(directory/"aviso-privacidad.pdf").read_bytes()
+        raw=(directory/"aviso-privacidad.txt").read_bytes()
         digest,text_digest=hashlib.sha256(pdf).hexdigest(),hashlib.sha256(raw).hexdigest()
         if digest!=info.get("pdf_sha256") or text_digest!=info.get("text_sha256"):
             raise RuntimeError("El aviso de privacidad fue modificado; revisa el paquete")
@@ -73,6 +73,16 @@ class Ledger:
               BEGIN SELECT RAISE(ABORT,'A published notice needs a new version'); END;
             CREATE TRIGGER IF NOT EXISTS privacy_notice_no_delete BEFORE DELETE ON privacy_notices
               BEGIN SELECT RAISE(ABORT,'Notice evidence is append-only'); END;
+            CREATE TABLE IF NOT EXISTS privacy_test_resets(
+              seq INTEGER PRIMARY KEY AUTOINCREMENT,id TEXT NOT NULL UNIQUE,
+              bot INTEGER NOT NULL,user INTEGER NOT NULL,cut_seq INTEGER NOT NULL,
+              accepted_event_id TEXT NOT NULL,at_utc TEXT NOT NULL,actor TEXT NOT NULL,
+              previous_hash TEXT NOT NULL,event_hash TEXT NOT NULL,evidence_json TEXT NOT NULL);
+            CREATE INDEX IF NOT EXISTS privacy_test_reset_account ON privacy_test_resets(bot,user,cut_seq);
+            CREATE TRIGGER IF NOT EXISTS privacy_test_resets_no_update BEFORE UPDATE ON privacy_test_resets
+              BEGIN SELECT RAISE(ABORT,'Test reset evidence is append-only'); END;
+            CREATE TRIGGER IF NOT EXISTS privacy_test_resets_no_delete BEFORE DELETE ON privacy_test_resets
+              BEGIN SELECT RAISE(ABORT,'Test reset evidence is append-only'); END;
         ''')
         n=self.notice
         old=conn.execute("SELECT pdf_sha256,text_sha256,notice_text,pdf FROM privacy_notices WHERE version=?",(n.version,)).fetchone()
@@ -93,7 +103,54 @@ class Ledger:
         if event["version"]!=self.notice.version or event["pdf_sha256"]!=self.notice.digest:return None
         if hashlib.sha256(event["evidence_json"].encode("utf-8")).hexdigest()!=event["event_hash"]:
             raise RuntimeError("La evidencia de autorizacion requiere revision")
+        if self.has_test_resets(conn):
+            reset=conn.execute("SELECT cut_seq FROM privacy_test_resets WHERE bot=? AND user=? "
+                "ORDER BY cut_seq DESC LIMIT 1",(bot,identity["user_id"])).fetchone()
+            if reset and event["seq"]<=reset["cut_seq"]:return None
         return event
+
+    @staticmethod
+    def has_test_resets(conn):
+        return bool(conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='privacy_test_resets'").fetchone())
+
+    def reset_for_test(self,identity,bot,*,expected_event_id,actor):
+        """Local administrative operation, deliberately absent from customer tools.
+
+        Invalidate one account's current decision without fabricating a customer
+        withdrawal or deleting linked evidence. A separate append-only chain
+        records the administrator's explicit reset for local verification.
+        """
+        if (type(bot) is not int or bot<=0 or type(identity.get("user_id")) is not int or
+                identity["user_id"]<=0 or identity.get("chat_id")!=identity["user_id"]):
+            raise ValueError("Selecciona una cuenta privada y un bot concretos")
+        if (self.notice.version!=NOTICE_VERSION or not isinstance(actor,str) or
+                not actor.strip() or len(actor)>200):
+            raise ValueError("El reinicio requiere el aviso vigente y un administrador local")
+        with self.store.transaction() as conn:
+            if not self.has_test_resets(conn):
+                raise RuntimeError("Actualiza el plugin a 1.6.1 antes de reiniciar la prueba")
+            current=self.current(identity,bot,conn)
+            if not current or current["id"]!=expected_event_id:
+                raise ValueError("La autorizacion cambio o ya fue reiniciada. Consulta la lista de nuevo")
+            previous=conn.execute("SELECT event_hash FROM privacy_test_resets ORDER BY seq DESC LIMIT 1").fetchone()
+            value={"id":uuid.uuid4().hex,"bot":bot,"user":identity["user_id"],
+                   "cut_seq":current["seq"],"accepted_event_id":current["id"],
+                   "at_utc":datetime.now(timezone.utc).isoformat(),"actor":actor.strip(),
+                   "previous_hash":previous[0] if previous else "",
+                   "action":"administrative_test_reset","channel":"local_administration"}
+            evidence=canonical(value)
+            fields=["id","bot","user","cut_seq","accepted_event_id","at_utc","actor","previous_hash"]
+            conn.execute("INSERT INTO privacy_test_resets("+",".join(fields)+",event_hash,evidence_json) "
+                "VALUES(?,?,?,?,?,?,?,?,?,?)",(*[value[k] for k in fields],
+                hashlib.sha256(evidence.encode("utf-8")).hexdigest(),evidence))
+            # This also invalidates already-used acceptance buttons, whose replay
+            # would otherwise acknowledge the pre-reset acceptance to the user.
+            conn.execute("UPDATE privacy_prompts SET state='superseded' WHERE bot=? AND user=?",
+                         (bot,identity["user_id"]))
+            conn.execute("UPDATE bookings SET state='superseded' WHERE bot=? AND user=? AND state='proposed'",
+                         (bot,identity["user_id"]))
+            return {"success":True,"user_id":identity["user_id"],"bot_id":bot,
+                    "autorizado":False,"reinicio":value["id"]}
 
     def require(self,identity,bot,conn=None):
         event=self.current(identity,bot,conn)
@@ -143,6 +200,8 @@ class Ledger:
             if (action in {"accepted","declined"} and row["kind"]!="consent") or (
                     action in {"withdrawn","keep"} and row["kind"]!="withdraw"):
                 raise PermissionError("La accion no corresponde a este boton")
+            if row["version"]!=self.notice.version or row["pdf_sha256"]!=self.notice.digest:
+                raise ValueError("El aviso cambio. Revisa su version actual antes de decidir")
             if row["state"] in {"accepted","declined","withdrawn","kept"}:
                 event=conn.execute("SELECT * FROM privacy_events WHERE prompt=? ORDER BY seq LIMIT 1",(token,)).fetchone()
                 latest=conn.execute("SELECT id FROM privacy_events WHERE bot=? AND user=? ORDER BY seq DESC LIMIT 1",
@@ -153,8 +212,6 @@ class Ledger:
                 raise ValueError("Este boton ya fue utilizado. Consulta tu autorizacion actual")
             if row["state"]!="ready" or row["expires"]<time.time():
                 raise ValueError("La decision vencio o no esta lista. Solicita nuevamente el aviso")
-            if row["version"]!=self.notice.version or row["pdf_sha256"]!=self.notice.digest:
-                raise ValueError("El aviso cambio. Revisa su version actual antes de decidir")
             if (action in {"accepted","declined"} and row["kind"]!="consent") or (
                     action in {"withdrawn","keep"} and row["kind"]!="withdraw"):
                 raise PermissionError("La accion no corresponde a este boton")
@@ -192,6 +249,8 @@ class Ledger:
             events=[dict(r) for r in conn.execute("SELECT * FROM privacy_events ORDER BY seq")]
             notices=[dict(r) for r in conn.execute("SELECT version,pdf_sha256,text_sha256,notice_text,pdf FROM privacy_notices")]
             bookings=[dict(r) for r in conn.execute("SELECT id,bot,user,chat,consent_event_id,state,start FROM bookings ORDER BY created")]
+            resets=([dict(r) for r in conn.execute("SELECT * FROM privacy_test_resets ORDER BY seq")]
+                    if self.has_test_resets(conn) else [])
         previous=""
         for e in events:
             value=json.loads(e["evidence_json"])
@@ -206,12 +265,27 @@ class Ledger:
                     hashlib.sha256(n["notice_text"].encode("utf-8")).hexdigest()!=n["text_sha256"]):
                 raise RuntimeError("El aviso archivado no coincide con sus huellas")
         by_id={e["id"]:e for e in events}
+        previous=""
+        for reset in resets:
+            value=json.loads(reset["evidence_json"])
+            fields=["id","bot","user","cut_seq","accepted_event_id","at_utc","actor","previous_hash"]
+            accepted=by_id.get(reset["accepted_event_id"])
+            if (reset["previous_hash"]!=previous or value.get("previous_hash")!=previous or
+                    hashlib.sha256(reset["evidence_json"].encode("utf-8")).hexdigest()!=reset["event_hash"] or
+                    any(value.get(k)!=reset[k] for k in fields) or
+                    value.get("action")!="administrative_test_reset" or
+                    value.get("channel")!="local_administration" or not accepted or
+                    accepted["action"]!="accepted" or accepted["seq"]!=reset["cut_seq"] or
+                    (accepted["bot"],accepted["user"])!=(reset["bot"],reset["user"])):
+                raise RuntimeError("La cadena de reinicios de prueba no coincide")
+            previous=reset["event_hash"]
         for row in bookings:
             if row["consent_event_id"] and (row["consent_event_id"] not in by_id or
                     by_id[row["consent_event_id"]]["action"]!="accepted" or
                     any(by_id[row["consent_event_id"]][k]!=row[k] for k in ("bot","user","chat"))):
                 raise RuntimeError("Una cita no coincide con su evidencia de autorizacion")
         return {"eventos":len(events),"avisos_archivados":len(notices),"cadena_verificada":True,
+            "reinicios_de_prueba":[{k:r[k] for k in ["id","bot","user","at_utc","actor"]} for r in resets],
             "decisiones":[{k:e[k] for k in ["id","user","action","version","at_utc"]} for e in events],
             "citas":[{"codigo":r["id"],"estado":r["state"],"inicio":r["start"],
                       "autorizacion":r["consent_event_id"] or "sin evidencia anterior"} for r in bookings]}

@@ -5,7 +5,7 @@ import time
 import uuid
 
 from .common import MAX_ACTIVE_BOOKINGS, now
-from .patient import patient_details
+from .patient import patient_details, visit_details, appointment_description
 from .privacy import Ledger
 
 
@@ -57,6 +57,24 @@ class Store:
             for field in ("cedula", "telefono", "consent_event_id"):
                 if field not in columns:
                     conn.execute("ALTER TABLE bookings ADD COLUMN " + field + " TEXT")
+            if "correo" not in columns:
+                conn.execute("ALTER TABLE bookings ADD COLUMN correo TEXT")
+            if "calendar_details_version" not in columns:
+                conn.execute("ALTER TABLE bookings ADD COLUMN calendar_details_version INTEGER NOT NULL DEFAULT 0")
+            if "modalidad" not in columns:
+                conn.execute("ALTER TABLE bookings ADD COLUMN modalidad TEXT")
+            if "direccion" not in columns:
+                conn.execute("ALTER TABLE bookings ADD COLUMN direccion TEXT")
+            if "descripcion" not in columns:
+                conn.execute("ALTER TABLE bookings ADD COLUMN descripcion TEXT")
+            # Legacy rows keep NULL. Only new requests or an explicit description change require it.
+            for operation, suffix in (("INSERT", "insert"), ("UPDATE OF descripcion", "update")):
+                conn.executescript("CREATE TRIGGER IF NOT EXISTS booking_description_"+suffix+
+                    " BEFORE "+operation+" ON bookings WHEN NEW.descripcion IS NULL OR "
+                    "length(trim(NEW.descripcion)) NOT BETWEEN 3 AND 300 OR "
+                    "instr(NEW.descripcion,char(10))>0 OR instr(NEW.descripcion,char(13))>0 OR "
+                    "instr(NEW.descripcion,char(9))>0 "
+                    "BEGIN SELECT RAISE(ABORT,'A brief appointment description is required'); END;")
             for operation, suffix in (("INSERT", "insert"), ("UPDATE OF cedula,telefono", "update")):
                 conn.executescript("CREATE TRIGGER IF NOT EXISTS booking_patient_data_" + suffix +
                     " BEFORE " + operation + " ON bookings WHEN NEW.cedula IS NULL OR "
@@ -72,12 +90,23 @@ class Store:
             guard=("NEW.consent_event_id IS NULL OR NOT EXISTS (SELECT 1 FROM privacy_events p "
                 "WHERE p.id=NEW.consent_event_id AND p.bot=NEW.bot AND p.user=NEW.user AND p.chat=NEW.chat "
                 "AND p.action='accepted' AND p.version='"+n.version+"' AND p.pdf_sha256='"+n.digest+"' "
-                "AND p.seq=(SELECT MAX(seq) FROM privacy_events WHERE bot=NEW.bot AND user=NEW.user))")
+                "AND p.seq=(SELECT MAX(seq) FROM privacy_events WHERE bot=NEW.bot AND user=NEW.user) "
+                "AND NOT EXISTS (SELECT 1 FROM privacy_test_resets r WHERE r.bot=NEW.bot AND "
+                "r.user=NEW.user AND r.cut_seq>=p.seq))")
             conn.executescript("BEGIN IMMEDIATE; " + " ".join(
                 "DROP TRIGGER IF EXISTS booking_consent_"+suffix+"; CREATE TRIGGER booking_consent_"+suffix+
                 " BEFORE "+operation+" ON bookings WHEN "+guard+
                 " BEGIN SELECT RAISE(ABORT,'Account consent is required'); END;"
-                for operation,suffix in (("INSERT","insert"),("UPDATE OF consent_event_id","update")))+" COMMIT;")
+                for operation,suffix in (("INSERT","insert"),
+                    ("UPDATE OF consent_event_id,correo,contact,cedula,telefono,calendar_details_version,descripcion","update")))+" COMMIT;")
+            # Existing rows keep version 0 and NULL email. Only new bookings adopt the new notice/data format.
+            email_guard=("NEW.calendar_details_version!=1 OR NEW.correo IS NULL OR length(NEW.correo) NOT BETWEEN 6 AND 254 "
+                "OR NEW.correo NOT LIKE '%_@_%._%' OR NEW.correo GLOB '*[ '||char(9)||char(10)||char(13)||']*'")
+            conn.executescript("BEGIN IMMEDIATE; " + " ".join(
+                "DROP TRIGGER IF EXISTS booking_calendar_details_"+suffix+"; CREATE TRIGGER booking_calendar_details_"+suffix+
+                " BEFORE "+operation+" ON bookings WHEN "+email_guard+
+                " BEGIN SELECT RAISE(ABORT,'Patient email and Calendar details version are required'); END;"
+                for operation,suffix in (("INSERT","insert"),("UPDATE OF correo,calendar_details_version","update")))+" COMMIT;")
 
     def connect(self):
         conn = sqlite3.connect(self.path, timeout=65, isolation_level=None, factory=ClosingConnection)
@@ -127,10 +156,10 @@ class Store:
             raise ValueError("Ya tienes el maximo de tres citas activas por cuenta. "
                              "Puedes consultar o cancelar una cita propia antes de reservar otra")
 
-    def reusable(self, identity, bot, start, contact, cedula, telefono, conn=None):
+    def reusable(self, identity, bot, start, contact, cedula, telefono, correo, conn=None, *, modalidad="laboratorio", direccion=None, descripcion=None):
         if conn is None:
             with self.connect() as own:
-                return self.reusable(identity, bot, start, contact, cedula, telefono, own)
+                return self.reusable(identity, bot, start, contact, cedula, telefono, correo, own, modalidad=modalidad, direccion=direccion, descripcion=descripcion)
         previous = conn.execute("SELECT * FROM bookings WHERE bot=? AND user=? AND chat=? AND start=? "
             "AND (state IN ('creating','uncertain','confirmed','canceling') OR (state='proposed' AND expires>?)) "
             "ORDER BY created DESC", (bot,identity["user_id"],identity["chat_id"],start,time.time())).fetchall()
@@ -141,22 +170,26 @@ class Store:
                 continue
             same_patient = row["cedula"] == cedula or (not row["cedula"] and
                 " ".join(row["contact"].split()).casefold() == patient_key)
+            if same_patient and row["state"]!="proposed" and row.get("descripcion")!=descripcion:
+                raise ValueError("Ya existe una cita para ese paciente en esa franja. No se modifico su descripcion; consulta al personal para cambiar una cita registrada")
             if same_patient and (row["state"] != "proposed" or
-                    (row["cedula"] == cedula and row["telefono"] == telefono and
+                    ((row["modalidad"] or "laboratorio")==modalidad and row["direccion"]==direccion and row.get("descripcion")==descripcion and row["cedula"] == cedula and row["telefono"] == telefono and row["correo"] == correo and
                      " ".join(row["contact"].split()).casefold() == patient_key)):
                 if row["patients"] != 1:
                     raise ValueError("La reserva antigua requiere revision del personal")
                 return row
         return None
 
-    def proposal(self, identity, bot, start, patients, contact, cedula, telefono, *, instant=None):
+    def proposal(self, identity, bot, start, patients, contact, cedula, telefono, correo=None, *, instant=None, modalidad="laboratorio", direccion=None, descripcion=None):
         if type(patients) is not int or patients != 1:
             raise ValueError("Cada cita corresponde a una sola persona")
         self.privacy.require(identity,bot)
-        contact, cedula, telefono = patient_details(contact, cedula, telefono)
+        contact, cedula, telefono, correo = patient_details(contact, cedula, telefono, correo)
+        modalidad, direccion = visit_details(modalidad, direccion)
+        descripcion = appointment_description(descripcion)
         with self.transaction() as conn:
             authorization=self.privacy.require(identity,bot,conn)
-            previous = self.reusable(identity, bot, start, contact, cedula, telefono, conn)
+            previous = self.reusable(identity, bot, start, contact, cedula, telefono, correo, conn, modalidad=modalidad, direccion=direccion, descripcion=descripcion)
             if previous:
                 return previous
             self.enforce_limit(identity, bot, instant or now(), conn)
@@ -166,9 +199,9 @@ class Store:
                 "AND start=? AND cedula=? AND state='proposed'",
                 (bot,identity["user_id"],identity["chat_id"],start,cedula))
             code = uuid.uuid4().hex
-            conn.execute("INSERT INTO bookings(id,event_id,bot,user,chat,thread,start,patients,contact,cedula,telefono,consent_event_id,state,expires,created) "
-                "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,'proposed',?,?)", (code,"cb"+code,bot,identity["user_id"],identity["chat_id"],
-                    identity.get("thread_id"),start,patients,contact,cedula,telefono,authorization["id"],time.time()+600,time.time()))
+            conn.execute("INSERT INTO bookings(id,event_id,bot,user,chat,thread,start,patients,contact,cedula,telefono,correo,calendar_details_version,consent_event_id,state,expires,created,modalidad,direccion,descripcion) "
+                "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,1,?,'proposed',?,?,?,?,?)", (code,"cb"+code,bot,identity["user_id"],identity["chat_id"],
+                    identity.get("thread_id"),start,patients,contact,cedula,telefono,correo,authorization["id"],time.time()+600,time.time(),modalidad,direccion,descripcion))
             return self.one(code, conn)
 
     def update(self, booking, **fields):
@@ -221,7 +254,7 @@ class Store:
 
     def confirm(self, booking):
         with self.transaction() as conn:
-            conn.execute("UPDATE bookings SET state='confirmed',confirmed=?,notify='pending',customer_notice='pending' "
+            conn.execute("UPDATE bookings SET state='confirmed',confirmed=CASE WHEN modalidad='domicilio' THEN NULL ELSE ? END,notify='pending',customer_notice='pending' "
                          "WHERE id=? AND state IN ('creating','uncertain')",(time.time(),booking))
 
     def create_error(self, booking, uncertain):

@@ -1,12 +1,14 @@
 """Appointment rules. Google calendar IDs, identity and staff targets never come from the model."""
 from datetime import date, datetime, time as clock, timedelta
+import html
 import json
+import re
 import sqlite3
 import time
 
 from .common import TZ, now
 from .google_api import ApiError
-from .patient import patient_details, masked_cedula
+from .patient import patient_details, masked_cedula, visit_details, appointment_description
 from .privacy import ConsentRequired
 
 
@@ -117,31 +119,59 @@ class Service:
                 for point in slots(self.settings,day) if point > self.clock() and
                 self.used(point,events,rows) + patients <= 2]
 
-    def proposal(self, identity, start, patients, contact, cedula, telefono):
+    def proposal(self, identity, start, patients, contact, cedula, telefono, correo=None, *, modalidad="laboratorio", direccion=None, descripcion=None):
         self.store.privacy.require(identity,self.bot)
         start, patients = self.validate_start(start), self.patients(patients)
-        contact, cedula, telefono = patient_details(contact, cedula, telefono)
-        previous = self.store.reusable(identity,self.bot,start.isoformat(),contact,cedula,telefono)
+        contact, cedula, telefono, correo = patient_details(contact, cedula, telefono, correo)
+        modalidad, direccion = visit_details(modalidad, direccion)
+        descripcion = appointment_description(descripcion)
+        previous = self.store.reusable(identity,self.bot,start.isoformat(),contact,cedula,telefono,correo,modalidad=modalidad,direccion=direccion,descripcion=descripcion)
         if previous:
             return previous
         self.store.enforce_limit(identity,self.bot,self.clock())
         available = self.availability(start.date().isoformat(),patients)
         if start.isoformat() not in {row["inicio"] for row in available}:
             raise ValueError("La franja ya no tiene cupos suficientes")
-        return self.store.proposal(identity,self.bot,start.isoformat(),patients,contact,cedula,telefono,
-                                   instant=self.clock())
+        return self.store.proposal(identity,self.bot,start.isoformat(),patients,contact,cedula,telefono,correo,
+                                   instant=self.clock(),modalidad=modalidad,direccion=direccion,descripcion=descripcion)
+
+    @staticmethod
+    def description(row):
+        generic = "Reserva gestionada por Corelab. Cambios y cancelaciones desde el bot."
+        if row.get("calendar_details_version", 0) != 1:
+            return generic
+        contact, cedula, telefono, correo = patient_details(row["contact"],row["cedula"],row["telefono"],row["correo"])
+        # Calendar descriptions support HTML; escape customer input so names/emails remain plain data.
+        fields = [("Paciente", contact), ("Cédula", cedula), ("Correo", correo), ("Celular / teléfono", telefono)]
+        if row.get("modalidad")=="domicilio":
+            fields.append(("Dirección", row["direccion"]))
+            generic="Visita a domicilio pendiente de confirmación. El asesor debe contactar al cliente."
+        if row.get("descripcion") is not None:
+            fields.append(("Descripción de la cita", appointment_description(row["descripcion"])))
+        return "\n".join(label+": "+html.escape(value, quote=True) for label,value in fields)+"\n\n"+generic
+
+    @staticmethod
+    def visible_description(value):
+        # Google clients can normalize line breaks; escaped user HTML is decoded only after that.
+        value = re.sub(r"<br\s*/?>", "\n", str(value), flags=re.I).replace("\r\n", "\n")
+        return html.unescape(value).strip()
 
     @staticmethod
     def body(row):
         Service.patients(row["patients"])
         start = dt(row["start"])
-        return {"id": row["event_id"], "summary": "Cita Corelab " + row["id"][:8].upper() +
+        mode=row.get("modalidad")
+        label={"laboratorio":"Laboratorio", "domicilio":"Domicilio · Pendiente"}.get(mode)
+        return {"id": row["event_id"], "summary": (label+" · Corelab " if label else "Cita Corelab ")+row["id"][:8].upper()+
                     " · 1 paciente",
-                "description": "Reserva gestionada por Corelab. Cambios y cancelaciones desde el bot.",
+                **({"colorId":"6","status":"tentative"} if mode=="domicilio" else
+                   {"colorId":"9"} if mode=="laboratorio" else {}),
+                "description": Service.description(row),
                 "start": {"dateTime":start.isoformat(),"timeZone":"America/Guayaquil"},
                 "end": {"dateTime":(start+timedelta(minutes=30)).isoformat(),"timeZone":"America/Guayaquil"},
                 "visibility":"private", "transparency":"opaque",
-                "extendedProperties":{"private":{"corelab_booking":row["id"]}}}
+                "extendedProperties":{"private":{"corelab_booking":row["id"],
+                    **({"corelab_details_version":"1"} if row.get("calendar_details_version",0)==1 else {})}}}
 
     def verify_event(self, event, row):
         a, b = event_range(event)
@@ -149,10 +179,34 @@ class Service:
                 event.get("extendedProperties",{}).get("private",{}).get("corelab_booking") != row["id"] or
                 a != dt(row["start"]) or b != a+timedelta(minutes=30)):
             raise ValueError("El evento de la reserva cambio; requiere revision del personal")
+        if row.get("modalidad")=="domicilio" and event.get("status")!="tentative":
+            raise ValueError("La visita no quedó registrada como pendiente en Calendar")
+        if row.get("calendar_details_version",0)==1:
+            if (event.get("visibility")!="private" or
+                    event.get("extendedProperties",{}).get("private",{}).get("corelab_details_version")!="1" or
+                    self.visible_description(event.get("description","")) != self.visible_description(self.description(row))):
+                raise ValueError("Los datos de contacto no quedaron verificados en Calendar; requiere revision del personal")
 
     def finish_create(self, row):
         wrote=False
         try:
+            if row.get("calendar_details_version",0)==1:
+                identity={"user_id":row["user"],"chat_id":row["chat"]}
+                try:
+                    consent=self.store.privacy.require(identity,self.bot)
+                    if consent["id"] != row["consent_event_id"]:
+                        raise ConsentRequired("La autorizacion de la solicitud cambio")
+                except ConsentRequired:
+                    # Read an event that may already exist, but never transmit details after withdrawal/reset.
+                    try:
+                        existing=self.google.event(row["event_id"])
+                        self.verify_event(existing,row)
+                        self.store.confirm(row["id"])
+                    except ApiError as exc:
+                        self.store.create_error(row["id"],exc.status not in {404,410})
+                    except Exception:
+                        self.store.create_error(row["id"],True)
+                    return self.store.one(row["id"])
             try:
                 self.google.create(self.body(row))
             except ApiError as exc:
@@ -181,7 +235,7 @@ class Service:
             if row["consent_event_id"]!=authorization["id"]:
                 raise ConsentRequired("La solicitud es anterior a la autorizacion vigente. Solicita nuevamente la cita")
             self.patients(row["patients"])
-            patient_details(row["contact"],row["cedula"],row["telefono"])
+            patient_details(row["contact"],row["cedula"],row["telefono"],row["correo"])
             if row["expires"] < time.time():
                 raise ValueError("La confirmacion vencio; solicita nuevamente la cita")
             self.store.enforce_limit(identity,self.bot,self.clock(),conn)
@@ -232,7 +286,8 @@ class Service:
                     except ApiError as exc:
                         state="cancelada_en_calendar" if exc.status in {404,410} else "verificacion_no_disponible"
                 result.append({"codigo":row["id"],"inicio":start,"paciente":row["contact"],
-                               "cedula":masked_cedula(row["cedula"]),"estado":state})
+                               "cedula":masked_cedula(row["cedula"]),"modalidad":row["modalidad"] or "laboratorio",
+                               "estado":"pendiente_confirmacion_asesor" if state in {"confirmed","modificada_en_calendar"} and row["modalidad"]=="domicilio" else state})
         return result[-10:]
 
     def cancel_proposal(self, identity, booking):

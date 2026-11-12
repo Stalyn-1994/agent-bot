@@ -1,6 +1,7 @@
 name: corelab-cotizador
-version: 1.0.1
+version: 1.1.1
 description: Cotizador determinista de examenes Corelab a partir de la cartera publicada
 author: Corelab
 provides_tools:
   - cotizar_examenes
+  - gestionar_pdf_cotizacion
